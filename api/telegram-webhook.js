@@ -405,6 +405,11 @@ module.exports = async function handler(req, res) {
     res.status(200).send('ok');
   } catch (err) {
     console.log('Webhook error:', err.message);
+    try {
+      await sendMessage(COACH_CHAT_ID, '⚠️ Ошибка в боте при обработке сообщения: ' + err.message);
+    } catch (notifyErr) {
+      console.log('Failed to notify coach about error:', notifyErr.message);
+    }
     res.status(200).send('ok');
   }
 };
