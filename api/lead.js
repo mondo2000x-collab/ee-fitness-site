@@ -1,9 +1,4 @@
-// api/lead.js
-// Серверная функция (Vercel Serverless Function).
-// Токен бота и chat_id хранятся в переменных окружения — не в коде,
-// поэтому в браузере они никому не видны.
-
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   if (req.method !== 'POST') {
     res.status(405).json({ ok: false, error: 'Method not allowed' });
     return;
@@ -17,7 +12,10 @@ export default async function handler(req, res) {
     return;
   }
 
-  const { name, contact, goal } = req.body || {};
+  const body = req.body || {};
+  const name = body.name;
+  const contact = body.contact;
+  const goal = body.goal;
 
   if (!name || !contact) {
     res.status(400).json({ ok: false, error: 'Missing required fields' });
@@ -25,18 +23,18 @@ export default async function handler(req, res) {
   }
 
   const text =
-    Новая заявка с сайта E&E Fitness\n +
-    Имя: ${name}\n +
-    Контакт: ${contact}\n +
-    Цель/комментарий: ${goal || '—'};
+    'Новая заявка с сайта E&E Fitness\n' +
+    'Имя: ' + name + '\n' +
+    'Контакт: ' + contact + '\n' +
+    'Цель/комментарий: ' + (goal || '—');
 
   try {
     const tgResponse = await fetch(
-      https://api.telegram.org/bot${BOT_TOKEN}/sendMessage,
+      'https://api.telegram.org/bot' + BOT_TOKEN + '/sendMessage',
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ chat_id: CHAT_ID, text }),
+        body: JSON.stringify({ chat_id: CHAT_ID, text: text }),
       }
     );
 
@@ -51,4 +49,4 @@ export default async function handler(req, res) {
   } catch (err) {
     res.status(500).json({ ok: false, error: 'Unexpected error' });
   }
-}
+};
