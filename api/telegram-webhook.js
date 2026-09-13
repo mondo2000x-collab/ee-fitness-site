@@ -4,6 +4,14 @@ const SHEET_ID = process.env.GOOGLE_SHEET_ID;
 const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 const COACH_CHAT_ID = process.env.TELEGRAM_CHAT_ID;
 
+const HELP_TEXT =
+  'Что я умею:\n\n' +
+  '«кбжу калории белки жиры углеводы шаги» — отчёт по питанию за сегодня\nПример: кбжу 1800 100 45 200 8000\n\n' +
+  '«замер вес талия бёдра грудь» — новые замеры\nПример: замер 77.1 87 101 98\n\n' +
+  '«тренировка: как всё прошло» — отчёт по тренировке\nПример: тренировка: сделал(а) всё, тяжело дались последние подходы приседа\n\n' +
+  'Любое другое сообщение или фото — перешлю тренеру напрямую.\n\n' +
+  'В любой момент можно написать /help, чтобы увидеть эту подсказку снова.';
+
 function todayRu() {
   const d = new Date();
   const dd = String(d.getDate()).padStart(2, '0');
@@ -48,7 +56,6 @@ async function findClientByNameOrId(text, accessToken) {
   const rows = await getValues(SHEET_ID, 'Клиенты!A2:M1000', accessToken);
   const trimmed = text.trim();
 
-  // Если прислали чистое число — ищем по ID клиента
   if (/^\d+$/.test(trimmed)) {
     for (let i = 0; i < rows.length; i++) {
       const row = rows[i];
@@ -59,7 +66,6 @@ async function findClientByNameOrId(text, accessToken) {
     return null;
   }
 
-  // Иначе ищем по ФИО
   const normalized = trimmed.toLowerCase();
   for (let i = 0; i < rows.length; i++) {
     const row = rows[i];
@@ -84,6 +90,28 @@ async function getNextClientId(accessToken) {
 function extractRowNumber(updatedRange) {
   const match = updatedRange.match(/![A-Z]+(\d+):/);
   return match ? parseInt(match[1], 10) : null;
+}
+
+function columnIndexToLetter(index) {
+  let letter = '';
+  let n = index;
+  while (n >= 0) {
+    letter = String.fromCharCode((n % 26) + 65) + letter;
+    n = Math.floor(n / 26) - 1;
+  }
+  return letter;
+}
+
+async function findColumnLetterByHeader(sheetName, headerFragment, accessToken) {
+  const rows = await getValues(SHEET_ID, sheetName + '!1:1', accessToken);
+  const headers = rows[0] || [];
+  const target = headerFragment.toLowerCase();
+  for (let i = 0; i < headers.length; i++) {
+    if ((headers[i] || '').toLowerCase().includes(target)) {
+      return columnIndexToLetter(i);
+    }
+  }
+  return null;
 }
 
 async function linkChatId(rowIndex, chatId, accessToken) {
@@ -124,6 +152,24 @@ function looksLikePhone(text) {
 
 async function savePhone(rowIndex, phoneText, accessToken) {
   await updateValues(SHEET_ID, 'Клиенты!C' + rowIndex, [phoneText.trim()], accessToken);
+}
+
+async function saveWorkoutReport(client, feedbackText, accessToken) {
+  const result = await appendValues(
+    SHEET_ID,
+    'Тренировки!A:C',
+    [client.idClient, client.fio, todayRu()],
+    accessToken
+  );
+  const updatedRange = result.data && result.data.updates && result.data.updates.updatedRange;
+  const rowIndex = updatedRange ? extractRowNumber(updatedRange) : null;
+  if (!rowIndex) return false;
+
+  const feedbackColumn = await findColumnLetterByHeader('Тренировки', 'обратная связь', accessToken);
+  if (feedbackColumn) {
+    await updateValues(SHEET_ID, 'Тренировки!' + feedbackColumn + rowIndex, [feedbackText], accessToken);
+  }
+  return true;
 }
 
 module.exports = async function handler(req, res) {
@@ -174,10 +220,7 @@ module.exports = async function handler(req, res) {
         chatId,
         (isNew ? 'Записал вас, ' : 'Отлично, ') + found.fio + '! Вы подключены.\n\n' +
         (isNew ? 'Пришлите, пожалуйста, ваш номер телефона для связи (например: +7 900 111-22-33).\n\n' : '') +
-        'Как присылать отчёты:\n' +
-        '«кбжу калории белки жиры углеводы шаги» — например:\nкбжу 1800 100 45 200 8000\n\n' +
-        '«замер вес талия бёдра грудь» — например:\nзамер 77.1 87 101 98\n\n' +
-        'Любое другое сообщение или фото — я перешлю тренеру.'
+        HELP_TEXT
       );
 
       if (isNew) {
@@ -189,6 +232,12 @@ module.exports = async function handler(req, res) {
     }
 
     const lowerText = text.toLowerCase();
+
+    if (lowerText === '/help' || lowerText === '/start') {
+      await sendMessage(chatId, HELP_TEXT);
+      res.status(200).send('ok');
+      return;
+    }
 
     if (!client.phone && looksLikePhone(text)) {
       await savePhone(client.rowIndex, text, accessToken);
@@ -228,6 +277,23 @@ module.exports = async function handler(req, res) {
         await sendMessage(COACH_CHAT_ID, client.fio + ' прислал(а) новые замеры.');
       } else {
         await sendMessage(chatId, 'Не разобрал формат. Пришлите так:\nзамер 77.1 87 101 98\n(вес талия бёдра грудь)');
+      }
+      res.status(200).send('ok');
+      return;
+    }
+
+    if (lowerText.startsWith('тренировка')) {
+      const feedbackText = text.slice('тренировка'.length).replace(/^[:\s]+/, '').trim();
+      if (feedbackText) {
+        const saved = await saveWorkoutReport(client, feedbackText, accessToken);
+        if (saved) {
+          await sendMessage(chatId, 'Отчёт по тренировке записан, спасибо!');
+          await sendMessage(COACH_CHAT_ID, client.fio + ' прислал(а) отчёт по тренировке: ' + feedbackText);
+        } else {
+          await sendMessage(chatId, 'Не получилось записать отчёт, попробуйте ещё раз чуть позже.');
+        }
+      } else {
+        await sendMessage(chatId, 'Напишите так:\nтренировка: как всё прошло\nНапример: тренировка: сделал(а) всё, было тяжело на последнем подходе');
       }
       res.status(200).send('ok');
       return;
