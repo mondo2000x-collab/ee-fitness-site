@@ -8,7 +8,8 @@ const HELP_TEXT =
   'Что я умею:\n\n' +
   '«кбжу калории белки жиры углеводы шаги» — отчёт по питанию за сегодня\nПример: кбжу 1800 100 45 200 8000\n\n' +
   '«замер вес талия бёдра грудь» — новые замеры\nПример: замер 77.1 87 101 98\n\n' +
-  '«тренировка: как всё прошло» — отчёт по тренировке\nПример: тренировка: сделал(а) всё, тяжело дались последние подходы приседа\n\n' +
+  'Отчёт по тренировке — каждое упражнение на новой строке, через запятую (название, подходы, повторы, вес):\n' +
+  'тренировка:\nЖим лёжа, 4, 10, 60\nПриседания, 3, 12, 80\n\n' +
   'Любое другое сообщение или фото — перешлю тренеру напрямую.\n\n' +
   'В любой момент можно написать /help, чтобы увидеть эту подсказку снова.';
 
@@ -102,16 +103,23 @@ function columnIndexToLetter(index) {
   return letter;
 }
 
-async function findColumnLetterByHeader(sheetName, headerFragment, accessToken) {
+async function getHeaderRow(sheetName, accessToken) {
   const rows = await getValues(SHEET_ID, sheetName + '!1:1', accessToken);
-  const headers = rows[0] || [];
-  const target = headerFragment.toLowerCase();
+  return rows[0] || [];
+}
+
+function findHeaderIndex(headers, fragment) {
+  const target = fragment.toLowerCase();
   for (let i = 0; i < headers.length; i++) {
-    if ((headers[i] || '').toLowerCase().includes(target)) {
-      return columnIndexToLetter(i);
-    }
+    if ((headers[i] || '').toLowerCase().includes(target)) return i;
   }
-  return null;
+  return -1;
+}
+
+async function findColumnLetterByHeader(sheetName, headerFragment, accessToken) {
+  const headers = await getHeaderRow(sheetName, accessToken);
+  const idx = findHeaderIndex(headers, headerFragment);
+  return idx >= 0 ? columnIndexToLetter(idx) : null;
 }
 
 async function linkChatId(rowIndex, chatId, accessToken) {
@@ -154,22 +162,96 @@ async function savePhone(rowIndex, phoneText, accessToken) {
   await updateValues(SHEET_ID, 'Клиенты!C' + rowIndex, [phoneText.trim()], accessToken);
 }
 
-async function saveWorkoutReport(client, feedbackText, accessToken) {
-  const result = await appendValues(
-    SHEET_ID,
-    'Тренировки!A:C',
-    [client.idClient, client.fio, todayRu()],
-    accessToken
-  );
-  const updatedRange = result.data && result.data.updates && result.data.updates.updatedRange;
-  const rowIndex = updatedRange ? extractRowNumber(updatedRange) : null;
-  if (!rowIndex) return false;
+function parseExerciseLines(rawText) {
+  const lines = rawText.split('\n').map((l) => l.trim()).filter(Boolean);
+  const exercises = [];
+  const badLines = [];
 
-  const feedbackColumn = await findColumnLetterByHeader('Тренировки', 'обратная связь', accessToken);
-  if (feedbackColumn) {
-    await updateValues(SHEET_ID, 'Тренировки!' + feedbackColumn + rowIndex, [feedbackText], accessToken);
+  for (const line of lines) {
+    const parts = line.split(',').map((p) => p.trim());
+    if (parts.length !== 4) {
+      badLines.push(line);
+      continue;
+    }
+    const [name, setsStr, repsStr, weightStr] = parts;
+    const sets = parseInt(setsStr, 10);
+    const reps = parseInt(repsStr, 10);
+    const weight = parseFloat(weightStr.replace(',', '.'));
+    if (!name || isNaN(sets) || isNaN(reps) || isNaN(weight)) {
+      badLines.push(line);
+      continue;
+    }
+    exercises.push({ name, sets, reps, weight });
   }
-  return true;
+
+  return { exercises, badLines };
+}
+
+async function getValidExerciseNames(accessToken) {
+  const headers = await getHeaderRow('Справочники', accessToken);
+  const idx = findHeaderIndex(headers, 'упражнени');
+  if (idx < 0) return [];
+  const colLetter = columnIndexToLetter(idx);
+  const rows = await getValues(SHEET_ID, 'Справочники!' + colLetter + '2:' + colLetter + '1000', accessToken);
+  return rows.map((r) => (r[0] || '').trim()).filter(Boolean);
+}
+
+function matchExerciseName(rawName, validNames) {
+  const normalized = rawName.trim().toLowerCase();
+  for (const valid of validNames) {
+    if (valid.toLowerCase() === normalized) return valid;
+  }
+  for (const valid of validNames) {
+    const validLower = valid.toLowerCase();
+    if (validLower.includes(normalized) || normalized.includes(validLower)) return valid;
+  }
+  return null;
+}
+
+async function saveWorkoutExercises(client, exercises, accessToken) {
+  const headers = await getHeaderRow('Тренировки', accessToken);
+  const validNames = await getValidExerciseNames(accessToken);
+  const unmatched = [];
+
+  for (const ex of exercises) {
+    const matched = matchExerciseName(ex.name, validNames);
+    if (matched) {
+      ex.name = matched;
+    } else {
+      unmatched.push(ex.name);
+    }
+  }
+
+  const idxId = findHeaderIndex(headers, 'id клиента');
+  const idxFio = findHeaderIndex(headers, 'фио');
+  const idxDate = findHeaderIndex(headers, 'дата');
+  const idxExercise = findHeaderIndex(headers, 'упражнени');
+  const setIdxs = [1, 2, 3, 4].map((n) => findHeaderIndex(headers, 'п' + n));
+
+  const allIdxs = [idxId, idxFio, idxDate, idxExercise].concat(setIdxs).filter((i) => i >= 0);
+  const maxIdx = Math.max.apply(null, allIdxs);
+  const rangeEndLetter = columnIndexToLetter(maxIdx);
+
+  let savedCount = 0;
+
+  for (const ex of exercises) {
+    const row = new Array(maxIdx + 1).fill('');
+    if (idxId >= 0) row[idxId] = client.idClient;
+    if (idxFio >= 0) row[idxFio] = client.fio;
+    if (idxDate >= 0) row[idxDate] = todayRu();
+    if (idxExercise >= 0) row[idxExercise] = ex.name;
+
+    for (let s = 0; s < 4; s++) {
+      if (setIdxs[s] >= 0 && s < ex.sets) {
+        row[setIdxs[s]] = ex.weight + '/' + ex.reps;
+      }
+    }
+
+    await appendValues(SHEET_ID, 'Тренировки!A:' + rangeEndLetter, row, accessToken);
+    savedCount++;
+  }
+
+  return { savedCount: savedCount, unmatched: unmatched };
 }
 
 module.exports = async function handler(req, res) {
@@ -283,18 +365,35 @@ module.exports = async function handler(req, res) {
     }
 
     if (lowerText.startsWith('тренировка')) {
-      const feedbackText = text.slice('тренировка'.length).replace(/^[:\s]+/, '').trim();
-      if (feedbackText) {
-        const saved = await saveWorkoutReport(client, feedbackText, accessToken);
-        if (saved) {
-          await sendMessage(chatId, 'Отчёт по тренировке записан, спасибо!');
-          await sendMessage(COACH_CHAT_ID, client.fio + ' прислал(а) отчёт по тренировке: ' + feedbackText);
-        } else {
-          await sendMessage(chatId, 'Не получилось записать отчёт, попробуйте ещё раз чуть позже.');
-        }
-      } else {
-        await sendMessage(chatId, 'Напишите так:\nтренировка: как всё прошло\nНапример: тренировка: сделал(а) всё, было тяжело на последнем подходе');
+      const rawAfterPrefix = text.slice('тренировка'.length).replace(/^[:\s]+/, '');
+      const { exercises, badLines } = parseExerciseLines(rawAfterPrefix);
+
+      if (exercises.length === 0) {
+        await sendMessage(
+          chatId,
+          'Не разобрал формат. Пришлите так, каждое упражнение на новой строке:\n' +
+          'тренировка:\nЖим лёжа, 4, 10, 60\nПриседания, 3, 12, 80\n' +
+          '(название, подходы, повторы, вес)'
+        );
+        res.status(200).send('ok');
+        return;
       }
+
+      const result = await saveWorkoutExercises(client, exercises, accessToken);
+
+      let reply = 'Записал ' + result.savedCount + ' упражнени' + (result.savedCount === 1 ? 'е' : 'й') + ', спасибо!';
+      if (badLines.length > 0) {
+        reply += '\n\nНе разобрал эти строки (проверьте формат):\n' + badLines.join('\n');
+      }
+      await sendMessage(chatId, reply);
+
+      const summary = exercises.map((e) => e.name + ' ' + e.sets + 'x' + e.reps + ' ' + e.weight + 'кг').join('\n');
+      let coachMessage = client.fio + ' прислал(а) отчёт по тренировке:\n' + summary;
+      if (result.unmatched.length > 0) {
+        coachMessage += '\n\n⚠️ Не нашёл в справочнике точное совпадение для: ' + result.unmatched.join(', ') + '. Проверьте написание в таблице.';
+      }
+      await sendMessage(COACH_CHAT_ID, coachMessage);
+
       res.status(200).send('ok');
       return;
     }
