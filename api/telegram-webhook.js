@@ -44,9 +44,23 @@ async function findClientByChatId(chatId, accessToken) {
   return null;
 }
 
-async function findClientByName(name, accessToken) {
+async function findClientByNameOrId(text, accessToken) {
   const rows = await getValues(SHEET_ID, 'Клиенты!A2:M1000', accessToken);
-  const normalized = name.trim().toLowerCase();
+  const trimmed = text.trim();
+
+  // Если прислали чистое число — ищем по ID клиента
+  if (/^\d+$/.test(trimmed)) {
+    for (let i = 0; i < rows.length; i++) {
+      const row = rows[i];
+      if (String(row[0]).trim() === trimmed) {
+        return { rowIndex: i + 2, idClient: row[0], fio: row[1] };
+      }
+    }
+    return null;
+  }
+
+  // Иначе ищем по ФИО
+  const normalized = trimmed.toLowerCase();
   for (let i = 0; i < rows.length; i++) {
     const row = rows[i];
     const fio = (row[1] || '').trim().toLowerCase();
@@ -57,8 +71,42 @@ async function findClientByName(name, accessToken) {
   return null;
 }
 
+async function getNextClientId(accessToken) {
+  const rows = await getValues(SHEET_ID, 'Клиенты!A2:A1000', accessToken);
+  let maxId = 0;
+  for (const row of rows) {
+    const n = parseInt(row[0], 10);
+    if (!isNaN(n) && n > maxId) maxId = n;
+  }
+  return maxId + 1;
+}
+
+function extractRowNumber(updatedRange) {
+  const match = updatedRange.match(/![A-Z]+(\d+):/);
+  return match ? parseInt(match[1], 10) : null;
+}
+
 async function linkChatId(rowIndex, chatId, accessToken) {
   await updateValues(SHEET_ID, 'Клиенты!M' + rowIndex, [String(chatId)], accessToken);
+}
+
+async function createNewClient(name, chatId, accessToken) {
+  const nextId = await getNextClientId(accessToken);
+  const result = await appendValues(
+    SHEET_ID,
+    'Клиенты!A:H',
+    [nextId, name, '', todayRu(), '', 'Активен', '', ''],
+    accessToken
+  );
+
+  const updatedRange = result.data && result.data.updates && result.data.updates.updatedRange;
+  const rowIndex = updatedRange ? extractRowNumber(updatedRange) : null;
+
+  if (rowIndex) {
+    await updateValues(SHEET_ID, 'Клиенты!M' + rowIndex, [String(chatId)], accessToken);
+  }
+
+  return { rowIndex: rowIndex, idClient: nextId, fio: name };
 }
 
 function parseNumbersAfterPrefix(text, prefixLength) {
@@ -91,25 +139,40 @@ module.exports = async function handler(req, res) {
 
     if (!client) {
       if (text.toLowerCase() === '/start') {
-        await sendMessage(chatId, 'Здравствуйте! Напишите, пожалуйста, ваше имя и фамилию, как их записал тренер, чтобы я вас узнал.');
+        await sendMessage(chatId, 'Здравствуйте! Напишите, пожалуйста, ваше имя и фамилию (или ваш ID клиента, если тренер его сообщил), чтобы я вас нашёл.');
         res.status(200).send('ok');
         return;
       }
 
-      const found = await findClientByName(text, accessToken);
-      if (found) {
-        await linkChatId(found.rowIndex, chatId, accessToken);
-        await sendMessage(
-          chatId,
-          'Отлично, ' + found.fio + '! Вы подключены.\n\n' +
-          'Как присылать отчёты:\n' +
-          '«кбжу калории белки жиры углеводы шаги» — например:\nкбжу 1800 100 45 200 8000\n\n' +
-          '«замер вес талия бёдра грудь» — например:\nзамер 77.1 87 101 98\n\n' +
-          'Любое другое сообщение или фото — я перешлю тренеру.'
-        );
-      } else {
-        await sendMessage(chatId, 'Не нашёл вас в базе клиентов. Проверьте, что имя написано так же, как у тренера, и попробуйте ещё раз, либо напишите тренеру напрямую.');
+      if (!text || text.length < 2) {
+        await sendMessage(chatId, 'Напишите, пожалуйста, ваше имя и фамилию текстом.');
+        res.status(200).send('ok');
+        return;
       }
+
+      let found = await findClientByNameOrId(text, accessToken);
+      let isNew = false;
+
+      if (!found) {
+        found = await createNewClient(text, chatId, accessToken);
+        isNew = true;
+      } else {
+        await linkChatId(found.rowIndex, chatId, accessToken);
+      }
+
+      await sendMessage(
+        chatId,
+        (isNew ? 'Записал вас, ' : 'Отлично, ') + found.fio + '! Вы подключены.\n\n' +
+        'Как присылать отчёты:\n' +
+        '«кбжу калории белки жиры углеводы шаги» — например:\nкбжу 1800 100 45 200 8000\n\n' +
+        '«замер вес талия бёдра грудь» — например:\nзамер 77.1 87 101 98\n\n' +
+        'Любое другое сообщение или фото — я перешлю тренеру.'
+      );
+
+      if (isNew) {
+        await sendMessage(COACH_CHAT_ID, 'Новый клиент через бота: ' + found.fio + ' (ID ' + found.idClient + '). Заполните тариф и остальные данные в таблице.');
+      }
+
       res.status(200).send('ok');
       return;
     }
