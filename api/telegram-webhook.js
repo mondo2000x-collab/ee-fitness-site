@@ -38,7 +38,7 @@ async function findClientByChatId(chatId, accessToken) {
     const row = rows[i];
     const telegramChatId = row[12];
     if (telegramChatId && String(telegramChatId).trim() === String(chatId)) {
-      return { rowIndex: i + 2, idClient: row[0], fio: row[1] };
+      return { rowIndex: i + 2, idClient: row[0], fio: row[1], phone: row[2] || '' };
     }
   }
   return null;
@@ -90,12 +90,13 @@ async function linkChatId(rowIndex, chatId, accessToken) {
   await updateValues(SHEET_ID, 'Клиенты!M' + rowIndex, [String(chatId)], accessToken);
 }
 
-async function createNewClient(name, chatId, accessToken) {
+async function createNewClient(name, chatId, username, accessToken) {
   const nextId = await getNextClientId(accessToken);
+  const contact = username ? '@' + username : '';
   const result = await appendValues(
     SHEET_ID,
     'Клиенты!A:H',
-    [nextId, name, '', todayRu(), '', 'Активен', '', ''],
+    [nextId, name, contact, todayRu(), '', 'Активен', '', ''],
     accessToken
   );
 
@@ -106,7 +107,7 @@ async function createNewClient(name, chatId, accessToken) {
     await updateValues(SHEET_ID, 'Клиенты!M' + rowIndex, [String(chatId)], accessToken);
   }
 
-  return { rowIndex: rowIndex, idClient: nextId, fio: name };
+  return { rowIndex: rowIndex, idClient: nextId, fio: name, phone: contact };
 }
 
 function parseNumbersAfterPrefix(text, prefixLength) {
@@ -114,6 +115,15 @@ function parseNumbersAfterPrefix(text, prefixLength) {
   const parts = rest.split(/\s+/).map(Number);
   if (parts.length === 0 || parts.some((n) => isNaN(n))) return null;
   return parts;
+}
+
+function looksLikePhone(text) {
+  const cleaned = text.replace(/[\s\-\(\)]/g, '');
+  return /^\+?\d{7,15}$/.test(cleaned);
+}
+
+async function savePhone(rowIndex, phoneText, accessToken) {
+  await updateValues(SHEET_ID, 'Клиенты!C' + rowIndex, [phoneText.trim()], accessToken);
 }
 
 module.exports = async function handler(req, res) {
@@ -154,7 +164,7 @@ module.exports = async function handler(req, res) {
       let isNew = false;
 
       if (!found) {
-        found = await createNewClient(text, chatId, accessToken);
+        found = await createNewClient(text, chatId, message.from && message.from.username, accessToken);
         isNew = true;
       } else {
         await linkChatId(found.rowIndex, chatId, accessToken);
@@ -163,6 +173,7 @@ module.exports = async function handler(req, res) {
       await sendMessage(
         chatId,
         (isNew ? 'Записал вас, ' : 'Отлично, ') + found.fio + '! Вы подключены.\n\n' +
+        (isNew ? 'Пришлите, пожалуйста, ваш номер телефона для связи (например: +7 900 111-22-33).\n\n' : '') +
         'Как присылать отчёты:\n' +
         '«кбжу калории белки жиры углеводы шаги» — например:\nкбжу 1800 100 45 200 8000\n\n' +
         '«замер вес талия бёдра грудь» — например:\nзамер 77.1 87 101 98\n\n' +
@@ -178,6 +189,13 @@ module.exports = async function handler(req, res) {
     }
 
     const lowerText = text.toLowerCase();
+
+    if (!client.phone && looksLikePhone(text)) {
+      await savePhone(client.rowIndex, text, accessToken);
+      await sendMessage(chatId, 'Записал номер, спасибо!');
+      res.status(200).send('ok');
+      return;
+    }
 
     if (lowerText.startsWith('кбжу')) {
       const nums = parseNumbersAfterPrefix(text, 4);
