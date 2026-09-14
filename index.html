@@ -165,15 +165,23 @@
 
   /* RESULTS */
   .results-grid{display:grid;grid-template-columns:1fr;gap:18px;margin-top:36px}
-  @media (min-width:700px){.results-grid{grid-template-columns:repeat(3,1fr)}}
+  @media (min-width:700px){.results-grid{grid-template-columns:repeat(2,1fr)}}
   .result-slot{border:1.5px dashed var(--line);border-radius:var(--radius);padding:34px 20px;text-align:center;color:var(--gray-mid);font-size:14px;min-height:190px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px}
   .result-slot strong{color:var(--text);font-size:15px;font-weight:600}
+  .result-card{border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;background:var(--white)}
+  .result-card img{width:100%;height:auto;display:block}
+  .result-caption{padding:16px 18px}
+  .result-caption strong{display:block;color:var(--text);font-size:15px;font-weight:600;margin-bottom:4px}
+  .result-caption span{font-size:14px;color:#4a4a4d}
 
   /* COACH */
   .coach{background:var(--black);color:var(--white)}
+  .team-photo{margin:36px 0 48px;border-radius:var(--radius);overflow:hidden}
+  .team-photo img{width:100%;height:auto;display:block}
   .coach-grid{display:grid;grid-template-columns:1fr;gap:36px;margin-top:36px;align-items:start}
-  @media (min-width:820px){.coach-grid{grid-template-columns:220px 1fr}}
+  @media (min-width:820px){.coach-grid{grid-template-columns:180px 1fr}}
   .coach-avatar{width:180px;height:180px;border-radius:50%;background:linear-gradient(135deg,#2a2a2d,#151516);border:1px solid var(--line-inv);display:flex;align-items:center;justify-content:center;font-family:'Golos Text',sans-serif;font-weight:700;font-size:44px;color:var(--red)}
+  .coach-photo{width:180px;height:180px;border-radius:50%;object-fit:cover;border:1px solid var(--line-inv);flex:none}
   .coach h2{color:var(--white)}
   .coach-name{font-size:15px;font-weight:600;color:var(--gray-mid);margin-bottom:6px;letter-spacing:0.02em}
   .coach-title{font-size:22px;font-weight:700;font-family:'Golos Text',sans-serif;margin-bottom:16px}
@@ -233,7 +241,7 @@
       <a href="#services">Программы</a>
       <a href="#pricing">Цены</a>
       <a href="#results">Результаты</a>
-      <a href="#coach">Тренер</a>
+      <a href="#coach">Команда</a>
       <a href="#faq">Вопросы</a>
     </nav>
     <div class="nav-right">
@@ -247,7 +255,7 @@
     <a href="#services">Программы</a>
     <a href="#pricing">Цены</a>
     <a href="#results">Результаты</a>
-    <a href="#coach">Тренер</a>
+    <a href="#coach">Команда</a>
     <a href="#faq">Вопросы</a>
   </div>
 </header>
@@ -462,11 +470,24 @@
   <section id="results" style="background:var(--gray-light)">
     <div class="wrap">
       <h2>Результаты клиентов</h2>
-      <p class="lead" style="margin-top:10px">Реальные истории появятся здесь по мере работы с клиентами.</p>
+      <p class="lead" style="margin-top:10px">Реальные истории людей, которые уже пришли к своему результату.</p>
       <div class="results-grid">
-        <div class="result-slot"><strong>Фото и результат</strong><span>Место для истории клиента №1</span></div>
-        <div class="result-slot"><strong>Фото и результат</strong><span>Место для истории клиента №2</span></div>
-        <div class="result-slot"><strong>Фото и результат</strong><span>Место для истории клиента №3</span></div>
+        <div class="result-card">
+          <img src="images/case1.jpg" alt="Результат клиента: снижение веса и набор мышечной массы" loading="lazy">
+          <div class="result-caption"><strong>-47 кг и +9 кг мышечной массы</strong><span>Полтора года системной работы над питанием и тренировками.</span></div>
+        </div>
+        <div class="result-card">
+          <img src="images/case2.jpg" alt="Результат клиентки: изменение фигуры" loading="lazy">
+          <div class="result-caption"><strong>Заметное преображение</strong><span>Снижение веса и улучшение самочувствия благодаря индивидуальному плану.</span></div>
+        </div>
+        <div class="result-card">
+          <img src="images/case3.jpg" alt="Результат клиента: снижение веса со 139 до 102 кг" loading="lazy">
+          <div class="result-caption"><strong>-37 кг за 4 месяца</strong><span>Уверенный прогресс за счёт персонального сопровождения.</span></div>
+        </div>
+        <div class="result-card">
+          <img src="images/case4.jpg" alt="Результат клиентки: более стройная фигура" loading="lazy">
+          <div class="result-caption"><strong>Новый уровень формы</strong><span>Более стройный силуэт и уверенность в себе после системной работы.</span></div>
+        </div>
       </div>
     </div>
   </section>
@@ -474,14 +495,30 @@
   <!-- COACH -->
   <section class="coach" id="coach">
     <div class="wrap">
-      <h2>Тренер</h2>
+      <h2>Команда</h2>
+      <p class="lead" style="color:#c7c6c3;margin-top:10px">Каждый в нашей команде — эксперт в своей области. Мы работаем вместе, чтобы вы достигали своих целей.</p>
+
+      <div class="team-photo">
+        <img src="images/team.jpg" alt="Команда специалистов E&amp;E Fitness" loading="lazy">
+      </div>
+
       <div class="coach-grid">
-        <div class="coach-avatar">EE</div>
+        <img class="coach-photo" src="images/trener.jpg" alt="Антон, тренер E&amp;E Fitness" loading="lazy">
         <div>
-          <div class="coach-name">[ИМЯ ТРЕНЕРА]</div>
-          <div class="coach-title">[Должность / специализация]</div>
-          <p class="bio">[Место для краткой биографии тренера: опыт работы, образование и квалификации, с которыми он готов поделиться.]</p>
-          <p class="bio">Философия проста: помогать обычным людям разбираться в питании и тренировках и приходить к результату, который реально можно удержать — без образа фитнес-блогера и без давления.</p>
+          <div class="coach-name">ТРЕНЕР</div>
+          <div class="coach-title">Антон</div>
+          <p class="bio">Персональные тренировки, составление плана под ваши цели, коррекция техники и мотивация.</p>
+          <p class="bio">«Ваш результат — моя работа.»</p>
+        </div>
+      </div>
+
+      <div class="coach-grid" style="margin-top:44px">
+        <img class="coach-photo" src="images/doc.jpg" alt="Елена, врач-нутрициолог E&amp;E Fitness" loading="lazy">
+        <div>
+          <div class="coach-name">ВРАЧ-НУТРИЦИОЛОГ</div>
+          <div class="coach-title">Елена</div>
+          <p class="bio">Индивидуальные планы питания, анализ состава тела и пищевых привычек, коррекция обмена веществ.</p>
+          <p class="bio">«Правильное питание — основа вашего результата.»</p>
         </div>
       </div>
     </div>
@@ -584,14 +621,14 @@
         <h4>Навигация</h4>
         <a href="#services">Программы</a>
         <a href="#pricing">Цены</a>
-        <a href="#coach">Тренер</a>
+        <a href="#coach">Команда</a>
         <a href="#faq">Вопросы</a>
       </div>
       <div class="footer-col">
         <h4>Контакты</h4>
-        <a href="https://t.me/eefitness" target="_blank" rel="noopener">Telegram: @eefitness</a>
-        <a href="tel:+70000000000">+7 (000) 000-00-00</a>
-        <a href="mailto:hello@eefitness.ru">hello@eefitness.ru</a>
+        <a href="https://t.me/EEFitness1_bot" target="_blank" rel="noopener">Telegram: @EEFitness1_bot</a>
+        <a href="tel:+79057777370">+7 (905) 777-73-70</a>
+        <span style="display:block;font-size:14.5px;margin-bottom:10px;color:var(--gray-mid)">Email: скоро появится</span>
       </div>
     </div>
     <div class="footer-bottom">
