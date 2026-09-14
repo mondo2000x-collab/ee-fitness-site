@@ -116,10 +116,24 @@ function findHeaderIndex(headers, fragment) {
   return -1;
 }
 
-async function findColumnLetterByHeader(sheetName, headerFragment, accessToken) {
-  const headers = await getHeaderRow(sheetName, accessToken);
-  const idx = findHeaderIndex(headers, headerFragment);
-  return idx >= 0 ? columnIndexToLetter(idx) : null;
+// Находит первую строку, где колонка A (ID клиента) пустая — туда безопасно писать,
+// не задевая формулы в других колонках (например ФИО (авто)).
+async function findNextRowByColumnA(sheetName, accessToken) {
+  const rows = await getValues(SHEET_ID, sheetName + '!A2:A5000', accessToken);
+  for (let i = 0; i < rows.length; i++) {
+    if (!rows[i][0] || String(rows[i][0]).trim() === '') return i + 2;
+  }
+  return rows.length + 2;
+}
+
+// Пишет одно значение в ячейку, найденную по фрагменту заголовка. Никогда не трогает
+// колонки, для которых фрагмент не передан (в частности — ФИО (авто)).
+async function setCellByHeader(sheetName, headers, fragment, rowNumber, value, accessToken) {
+  const idx = findHeaderIndex(headers, fragment);
+  if (idx < 0) return false;
+  const letter = columnIndexToLetter(idx);
+  await updateValues(SHEET_ID, sheetName + '!' + letter + rowNumber, [value], accessToken);
+  return true;
 }
 
 async function linkChatId(rowIndex, chatId, accessToken) {
@@ -160,6 +174,31 @@ function looksLikePhone(text) {
 
 async function savePhone(rowIndex, phoneText, accessToken) {
   await updateValues(SHEET_ID, 'Клиенты!C' + rowIndex, [phoneText.trim()], accessToken);
+}
+
+async function saveKbzhuReport(client, nums, accessToken) {
+  const headers = await getHeaderRow('КБЖУ', accessToken);
+  const row = await findNextRowByColumnA('КБЖУ', accessToken);
+
+  await setCellByHeader('КБЖУ', headers, 'id клиента', row, client.idClient, accessToken);
+  await setCellByHeader('КБЖУ', headers, 'дата', row, todayRu(), accessToken);
+  await setCellByHeader('КБЖУ', headers, 'калории факт', row, nums[0], accessToken);
+  await setCellByHeader('КБЖУ', headers, 'белки факт', row, nums[1], accessToken);
+  await setCellByHeader('КБЖУ', headers, 'жиры факт', row, nums[2], accessToken);
+  await setCellByHeader('КБЖУ', headers, 'углеводы факт', row, nums[3], accessToken);
+  await setCellByHeader('КБЖУ', headers, 'шаги факт', row, nums[4], accessToken);
+}
+
+async function saveProgressReport(client, nums, accessToken) {
+  const headers = await getHeaderRow('Прогресс', accessToken);
+  const row = await findNextRowByColumnA('Прогресс', accessToken);
+
+  await setCellByHeader('Прогресс', headers, 'id клиента', row, client.idClient, accessToken);
+  await setCellByHeader('Прогресс', headers, 'дата замера', row, todayRu(), accessToken);
+  await setCellByHeader('Прогресс', headers, 'вес', row, nums[0], accessToken);
+  if (nums[1] !== undefined) await setCellByHeader('Прогресс', headers, 'талия', row, nums[1], accessToken);
+  if (nums[2] !== undefined) await setCellByHeader('Прогресс', headers, 'бёдра', row, nums[2], accessToken);
+  if (nums[3] !== undefined) await setCellByHeader('Прогресс', headers, 'грудь', row, nums[3], accessToken);
 }
 
 function parseExerciseLines(rawText) {
@@ -222,36 +261,25 @@ async function saveWorkoutExercises(client, exercises, accessToken) {
     }
   }
 
-  const idxId = findHeaderIndex(headers, 'id клиента');
-  const idxFio = findHeaderIndex(headers, 'фио');
-  const idxDate = findHeaderIndex(headers, 'дата');
-  const idxExercise = findHeaderIndex(headers, 'упражнени');
-  const setIdxs = [1, 2, 3, 4].map((n) => findHeaderIndex(headers, 'п' + n));
-
-  const allIdxs = [idxId, idxFio, idxDate, idxExercise].concat(setIdxs).filter((i) => i >= 0);
-  const maxIdx = Math.max.apply(null, allIdxs);
-  const rangeEndLetter = columnIndexToLetter(maxIdx);
-
-  let savedCount = 0;
+  let row = await findNextRowByColumnA('Тренировки', accessToken);
 
   for (const ex of exercises) {
-    const row = new Array(maxIdx + 1).fill('');
-    if (idxId >= 0) row[idxId] = client.idClient;
-    if (idxFio >= 0) row[idxFio] = client.fio;
-    if (idxDate >= 0) row[idxDate] = todayRu();
-    if (idxExercise >= 0) row[idxExercise] = ex.name;
+    await setCellByHeader('Тренировки', headers, 'id клиента', row, client.idClient, accessToken);
+    await setCellByHeader('Тренировки', headers, 'дата', row, todayRu(), accessToken);
+    await setCellByHeader('Тренировки', headers, 'упражнени', row, ex.name, accessToken);
 
-    for (let s = 0; s < 4; s++) {
-      if (setIdxs[s] >= 0 && s < ex.sets) {
-        row[setIdxs[s]] = ex.weight + '/' + ex.reps;
+    for (let s = 1; s <= 4; s++) {
+      if (s <= ex.sets) {
+        await setCellByHeader('Тренировки', headers, 'п' + s + ' вес', row, ex.weight, accessToken);
+        await setCellByHeader('Тренировки', headers, 'п' + s + ' повтор', row, ex.reps, accessToken);
       }
     }
 
-    await appendValues(SHEET_ID, 'Тренировки!A:' + rangeEndLetter, row, accessToken);
-    savedCount++;
+    await setCellByHeader('Тренировки', headers, 'статус', row, 'Выполнено', accessToken);
+    row++;
   }
 
-  return { savedCount: savedCount, unmatched: unmatched };
+  return { savedCount: exercises.length, unmatched: unmatched };
 }
 
 module.exports = async function handler(req, res) {
@@ -331,12 +359,7 @@ module.exports = async function handler(req, res) {
     if (lowerText.startsWith('кбжу')) {
       const nums = parseNumbersAfterPrefix(text, 4);
       if (nums && nums.length === 5) {
-        await appendValues(
-          SHEET_ID,
-          'КБЖУ!A:H',
-          [client.idClient, client.fio, todayRu(), nums[0], nums[1], nums[2], nums[3], nums[4]],
-          accessToken
-        );
+        await saveKbzhuReport(client, nums, accessToken);
         await sendMessage(chatId, 'Записал! Калории: ' + nums[0] + ', Б/Ж/У: ' + nums[1] + '/' + nums[2] + '/' + nums[3] + ', шаги: ' + nums[4] + '.');
         await sendMessage(COACH_CHAT_ID, client.fio + ' прислал(а) отчёт КБЖУ за сегодня.');
       } else {
@@ -349,12 +372,7 @@ module.exports = async function handler(req, res) {
     if (lowerText.startsWith('замер')) {
       const nums = parseNumbersAfterPrefix(text, 5);
       if (nums && nums.length >= 1) {
-        await appendValues(
-          SHEET_ID,
-          'Прогресс!A:G',
-          [client.idClient, client.fio, todayRu(), nums[0], nums[1] || '', nums[2] || '', nums[3] || ''],
-          accessToken
-        );
+        await saveProgressReport(client, nums, accessToken);
         await sendMessage(chatId, 'Замеры записаны, спасибо!');
         await sendMessage(COACH_CHAT_ID, client.fio + ' прислал(а) новые замеры.');
       } else {
