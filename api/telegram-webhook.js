@@ -104,7 +104,12 @@ function columnIndexToLetter(index) {
 }
 
 async function getHeaderRow(sheetName, accessToken) {
-  const rows = await getValues(SHEET_ID, sheetName + '!1:1', accessToken);
+  const rows = await getValues(SHEET_ID, sheetName + '!1:8', accessToken);
+  for (const row of rows) {
+    if (row.some((cell) => (cell || '').toLowerCase().trim() === 'id клиента')) {
+      return row;
+    }
+  }
   return rows[0] || [];
 }
 
@@ -249,6 +254,19 @@ function matchExerciseName(rawName, validNames) {
 
 async function saveWorkoutExercises(client, exercises, accessToken) {
   const headers = await getHeaderRow('Тренировки', accessToken);
+
+  const idxId = findHeaderIndex(headers, 'id клиента');
+  const idxExercise = findHeaderIndex(headers, 'упражнени');
+
+  if (idxId < 0 || idxExercise < 0) {
+    await sendMessage(
+      COACH_CHAT_ID,
+      '⚠️ Не нашёл нужные колонки в листе «Тренировки». Вот реальные заголовки, которые вижу:\n' +
+      headers.map((h, i) => (i + 1) + '. ' + (h || '(пусто)')).join('\n')
+    );
+    return { savedCount: 0, unmatched: [] };
+  }
+
   const validNames = await getValidExerciseNames(accessToken);
   const unmatched = [];
 
