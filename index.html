@@ -1,0 +1,858 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>E&amp;E Fitness — фитнес, питание и индивидуальное сопровождение</title>
+<meta name="description" content="Индивидуальные программы тренировок и питания. Помогаем снижать вес, набирать мышечную массу и улучшать физическую форму без экстремальных диет и изнурительных тренировок.">
+<meta property="og:title" content="E&amp;E Fitness — фитнес, который вписывается в вашу жизнь">
+<meta property="og:description" content="Индивидуальное сопровождение по питанию и тренировкам. Реалистичные результаты без крайностей.">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="ru_RU">
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="icon" type="image/png" href="images/favicon-32.png" sizes="32x32">
+<link rel="icon" type="image/png" href="images/favicon-16.png" sizes="16x16">
+<link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+<link rel="icon" type="image/png" href="images/favicon-192.png" sizes="192x192">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@500;600;700;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --black:#111113;
+    --white:#ffffff;
+    --red:#e2352a;
+    --red-dark:#c22a20;
+    --gray-light:#f1efec;
+    --gray-mid:#8a8781;
+    --text:#1a1a1c;
+    --line:rgba(17,17,19,0.12);
+    --line-inv:rgba(255,255,255,0.14);
+    --radius:6px;
+    --wrap:1140px;
+    --ease:cubic-bezier(.4,0,.2,1);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{animation-duration:0.01ms!important;transition-duration:0.01ms!important}}
+  body{
+    font-family:'Inter',sans-serif;
+    color:var(--text);
+    background:var(--white);
+    line-height:1.55;
+    font-size:16px;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3,.brand{font-family:'Golos Text',sans-serif;letter-spacing:-0.01em;}
+  a{color:inherit;text-decoration:none}
+  img,svg{display:block;max-width:100%}
+  .wrap{max-width:var(--wrap);margin:0 auto;padding:0 24px}
+  @media (max-width:480px){.wrap{padding:0 22px}}
+  section{padding:88px 0}
+  @media (max-width:640px){section{padding:56px 0}}
+  h2{font-size:clamp(28px,4.5vw,42px);font-weight:700;line-height:1.15;color:var(--black)}
+  h3{font-size:20px;font-weight:600}
+  .eyebrow-free{margin-bottom:16px}
+  .lead{font-size:18px;color:#4a4a4d;max-width:60ch}
+  .btn{
+    display:inline-flex;align-items:center;justify-content:center;gap:8px;
+    padding:15px 28px;border-radius:var(--radius);font-weight:600;font-size:15.5px;
+    border:1.5px solid transparent;cursor:pointer;transition:transform .18s var(--ease),background .18s var(--ease),border-color .18s var(--ease);
+    font-family:'Inter',sans-serif;
+  }
+  .btn-primary{background:var(--red);color:var(--white)}
+  .btn-primary:hover{background:var(--red-dark);transform:translateY(-1px)}
+  .btn-ghost-dark{border-color:var(--line);color:var(--black)}
+  .btn-ghost-dark:hover{border-color:var(--black)}
+  .btn-ghost-light{border-color:var(--line-inv);color:var(--white)}
+  .btn-ghost-light:hover{border-color:var(--white)}
+  .btn:focus-visible{outline:2px solid var(--red);outline-offset:3px}
+  a:focus-visible,button:focus-visible,summary:focus-visible{outline:2px solid var(--red);outline-offset:3px}
+
+  /* HEADER */
+  header{
+    position:sticky;top:0;z-index:100;
+    background:rgba(255,255,255,0.92);backdrop-filter:blur(10px);
+    border-bottom:1px solid transparent;
+    transition:border-color .2s var(--ease);
+  }
+  header.scrolled{border-color:var(--line)}
+  .nav{display:flex;align-items:center;justify-content:space-between;padding:18px 0}
+  .brand{font-size:19px;font-weight:700;color:var(--black)}
+  .brand span{color:var(--red)}
+  .nav-links{display:none;gap:28px;font-size:14.5px;font-weight:500;color:var(--text)}
+  .nav-links a:hover{color:var(--red)}
+  .nav-right{display:flex;align-items:center;gap:14px}
+  .burger{display:flex;flex-direction:column;gap:5px;background:none;border:none;cursor:pointer;padding:8px}
+  .burger span{width:22px;height:2px;background:var(--black);display:block;transition:transform .2s var(--ease),opacity .2s var(--ease)}
+  .mobile-menu{display:none;flex-direction:column;gap:2px;padding:8px 0 20px;border-top:1px solid var(--line)}
+  .mobile-menu.open{display:flex}
+  .mobile-menu a{padding:12px 0;font-size:15px;font-weight:500;border-bottom:1px solid var(--line)}
+  @media (min-width:900px){
+    .nav-links{display:flex}
+    .burger{display:none}
+  }
+
+  /* HERO */
+  .hero{background:var(--black);color:var(--white);overflow:hidden;position:relative;padding:64px 0 80px}
+  .hero-grid{display:grid;grid-template-columns:1fr;gap:40px;align-items:center}
+  @media (min-width:900px){.hero-grid{grid-template-columns:1.1fr 0.9fr;gap:24px}}
+  .hero h1{font-size:clamp(34px,6vw,58px);font-weight:900;line-height:1.06;letter-spacing:-0.02em;margin-bottom:22px;opacity:0;transform:translateY(16px);animation:rise .7s var(--ease) forwards .1s}
+  .hero .lead{color:#c7c6c3;font-size:18px;margin-bottom:18px;opacity:0;transform:translateY(16px);animation:rise .7s var(--ease) forwards .25s}
+  .hero-tags{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:32px;opacity:0;transform:translateY(16px);animation:rise .7s var(--ease) forwards .32s}
+  .hero-tag{font-size:12.5px;font-weight:600;color:#dedcd8;border:1px solid var(--line-inv);padding:6px 12px;border-radius:20px}
+  .hero-ctas{display:flex;flex-wrap:wrap;gap:14px;opacity:0;transform:translateY(16px);animation:rise .7s var(--ease) forwards .4s}
+  @keyframes rise{to{opacity:1;transform:translateY(0)}}
+  .hero-graphic{position:relative;height:320px;opacity:0;animation:fadeIn 1s var(--ease) forwards .5s}
+  @keyframes fadeIn{to{opacity:1}}
+  @media (max-width:899px){.hero-graphic{height:220px}}
+
+  /* PROBLEM */
+  .problem{background:var(--white)}
+  .problem-grid{display:grid;grid-template-columns:1fr;gap:56px;margin-top:40px}
+  @media (min-width:860px){.problem-grid{grid-template-columns:1fr 1fr}}
+  .problem-list{list-style:none;display:flex;flex-direction:column;gap:0}
+  .problem-list li{display:flex;gap:14px;align-items:flex-start;padding:16px 0;border-bottom:1px solid var(--line);font-size:16px}
+  .problem-list li:first-child{padding-top:0}
+  .check{flex:none;width:20px;height:20px;border-radius:4px;background:var(--red);position:relative;margin-top:2px}
+  .check::after{content:'';position:absolute;left:5px;top:2px;width:6px;height:10px;border-right:2px solid white;border-bottom:2px solid white;transform:rotate(40deg)}
+  .solution-box{align-self:start;background:var(--gray-light);border-left:3px solid var(--red);padding:28px 26px;border-radius:0 var(--radius) var(--radius) 0}
+  .solution-box p{font-size:20px;font-weight:600;line-height:1.35;color:var(--black)}
+
+  /* ABOUT / WHAT IS E&E */
+  .about{background:var(--gray-light)}
+  .about-grid{display:grid;grid-template-columns:1fr;gap:44px;margin-top:36px;align-items:start}
+  @media (min-width:860px){.about-grid{grid-template-columns:1fr 1fr}}
+  .key-message{margin-top:20px;font-size:19px;font-weight:700;color:var(--black)}
+  .flow{display:flex;flex-direction:column;gap:0;background:var(--white);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden}
+  .flow-item{display:flex;align-items:center;gap:14px;padding:16px 18px;border-bottom:1px solid var(--line);font-weight:600;font-size:15px}
+  .flow-item:last-child{border-bottom:none}
+  .flow-num{flex:none;width:30px;height:30px;border-radius:50%;background:var(--black);color:var(--white);display:flex;align-items:center;justify-content:center;font-size:13px;font-family:'Golos Text',sans-serif}
+  .flow-arrow{text-align:center;color:var(--gray-mid);font-size:13px;padding:2px 0}
+
+  /* HOW IT WORKS */
+  .steps{position:relative;margin-top:44px;display:flex;flex-direction:column}
+  .step{display:grid;grid-template-columns:48px 1fr;gap:20px;position:relative;padding-bottom:36px}
+  .step:last-child{padding-bottom:0}
+  .step-num{width:48px;height:48px;border-radius:50%;background:var(--black);color:var(--white);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;font-family:'Golos Text',sans-serif;flex:none;position:relative;z-index:1}
+  .step:before{content:'';position:absolute;left:23px;top:48px;bottom:-12px;width:1px;background:var(--line)}
+  .step:last-child:before{display:none}
+  .step-body h3{margin-bottom:6px}
+  .step-body p{color:#4a4a4d;font-size:15.5px}
+
+  /* SERVICES */
+  .cards3{display:grid;grid-template-columns:1fr;gap:18px;margin-top:40px}
+  @media (min-width:700px){.cards3{grid-template-columns:repeat(2,1fr)}}
+  @media (min-width:1020px){.cards3{grid-template-columns:repeat(4,1fr)}}
+  .service-card{border:1px solid var(--line);border-radius:var(--radius);padding:30px 26px;position:relative;overflow:hidden;transition:border-color .18s var(--ease);display:flex;flex-direction:column}
+  .service-card:hover{border-color:var(--black)}
+  .service-card:before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--red)}
+  .service-card h3{margin-bottom:14px}
+  .service-card .for-whom{font-size:13.5px;font-style:italic;color:var(--gray-mid);margin-top:14px;padding-top:14px;border-top:1px solid var(--line)}
+  .service-card ul{list-style:none;display:flex;flex-direction:column;gap:9px;margin-top:16px}
+  .service-card ul li{font-size:14.5px;color:#4a4a4d;padding-left:16px;position:relative}
+  .service-card ul li:before{content:'—';position:absolute;left:0;color:var(--gray-mid)}
+
+  /* PRICING */
+  .pricing{background:var(--gray-light)}
+  .price-grid{display:grid;grid-template-columns:1fr;gap:18px;margin-top:40px}
+  @media (min-width:700px){.price-grid{grid-template-columns:repeat(2,1fr)}}
+  @media (min-width:1020px){.price-grid{grid-template-columns:repeat(4,1fr)}}
+  .price-includes{font-size:12.5px;font-weight:600;color:var(--red);margin-bottom:10px}
+  .price-card{background:var(--white);border:1px solid var(--line);border-radius:var(--radius);padding:32px 26px;display:flex;flex-direction:column}
+  .price-card.featured{border:2px solid var(--red);position:relative}
+  .price-tag{position:absolute;top:-13px;left:26px;background:var(--red);color:var(--white);font-size:12.5px;font-weight:600;padding:5px 12px;border-radius:4px}
+  .price-name{font-size:15px;font-weight:600;color:var(--gray-mid);margin-bottom:6px}
+  .price-amount{font-size:36px;font-weight:900;font-family:'Golos Text',sans-serif;color:var(--black);margin-bottom:2px}
+  .price-duration{font-size:14px;color:var(--gray-mid);margin-bottom:22px}
+  .price-features{list-style:none;display:flex;flex-direction:column;gap:11px;margin-bottom:26px;flex:1}
+  .price-features li{font-size:14.5px;padding-left:18px;position:relative;color:#333}
+  .price-features li:before{content:'✓';position:absolute;left:0;color:var(--red);font-weight:700}
+
+  /* WHY US */
+  .why-grid{display:grid;grid-template-columns:1fr;gap:0;margin-top:36px;border-top:1px solid var(--line)}
+  @media (min-width:760px){.why-grid{grid-template-columns:1fr 1fr 1fr}}
+  .why-item{display:flex;gap:14px;padding:24px 4px;border-bottom:1px solid var(--line)}
+  @media (min-width:760px){.why-item{border-right:1px solid var(--line);padding-right:20px;padding-left:16px}.why-item:nth-child(3n){border-right:none}}
+  .why-dot{flex:none;width:8px;height:8px;border-radius:50%;background:var(--red);margin-top:9px}
+  .why-item h3{font-size:16.5px;margin-bottom:6px}
+  .why-item p{font-size:14px;color:#4a4a4d}
+
+  /* CASE RESULTS */
+  .case-grid{display:grid;grid-template-columns:1fr;gap:22px;margin-top:40px}
+  @media (min-width:760px){.case-grid{grid-template-columns:repeat(2,1fr)}}
+  .case-card{border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;background:var(--white)}
+  .case-photo{width:100%;aspect-ratio:16/10;object-fit:cover;background:var(--gray-light)}
+  .case-body{padding:22px 24px}
+  .case-tag{display:inline-block;font-size:11.5px;font-weight:700;letter-spacing:0.03em;text-transform:uppercase;color:var(--red);margin-bottom:10px}
+  .case-stats{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin-bottom:8px}
+  .case-delta{font-size:30px;font-weight:900;font-family:'Golos Text',sans-serif;color:var(--black)}
+  .case-range{font-size:14.5px;color:var(--gray-mid);font-weight:600}
+  .case-duration{font-size:13px;color:var(--gray-mid);margin-bottom:10px}
+  .case-desc{font-size:14.5px;color:#4a4a4d}
+  .case-disclaimer{margin-top:28px;font-size:12.5px;color:var(--gray-mid);max-width:70ch}
+
+  /* SPECIALISTS */
+  .specialists{background:var(--black);color:var(--white)}
+  .specialists h2{color:var(--white)}
+  .spec-grid{display:grid;grid-template-columns:1fr;gap:24px;margin-top:40px}
+  @media (min-width:760px){.spec-grid{grid-template-columns:1fr 1fr}}
+  .spec-card{border:1px solid var(--line-inv);border-radius:var(--radius);overflow:hidden}
+  .spec-photo{width:100%;aspect-ratio:1/1;object-fit:cover;background:#1c1c1e}
+  .spec-body{padding:22px 24px}
+  .spec-name{font-size:22px;font-weight:700;font-family:'Golos Text',sans-serif;margin-bottom:4px}
+  .spec-role{font-size:13.5px;font-weight:600;color:var(--red);text-transform:uppercase;letter-spacing:0.02em;margin-bottom:14px}
+  .spec-bio{color:#c7c6c3;font-size:14.5px;margin-bottom:6px}
+  .spec-badges{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+  .spec-badge{font-size:12px;font-weight:600;border:1px solid var(--line-inv);color:#dedcd8;padding:5px 11px;border-radius:20px}
+
+  /* APPROACH */
+  .approach-grid{display:grid;grid-template-columns:1fr;gap:18px;margin-top:36px}
+  @media (min-width:820px){.approach-grid{grid-template-columns:repeat(4,1fr)}}
+  .approach-card{border:1px solid var(--line);border-radius:var(--radius);padding:24px 20px}
+  .approach-card h3{font-size:16px;margin-bottom:8px}
+  .approach-card p{font-size:14px;color:#4a4a4d}
+  .medical-note{margin-top:24px;font-size:12.5px;color:var(--gray-mid);max-width:70ch}
+
+  /* RESULTS placeholder (legacy, kept for future empty slots) */
+  .result-slot{border:1.5px dashed var(--line);border-radius:var(--radius);padding:34px 20px;text-align:center;color:var(--gray-mid);font-size:14px;min-height:190px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px}
+  .result-slot strong{color:var(--text);font-size:15px;font-weight:600}
+
+  /* FAQ */
+  .faq-list{margin-top:36px;border-top:1px solid var(--line)}
+  .faq-item{border-bottom:1px solid var(--line)}
+  .faq-item summary{list-style:none;cursor:pointer;padding:20px 4px;display:flex;justify-content:space-between;align-items:center;gap:16px;font-weight:600;font-size:16px}
+  .faq-item summary::-webkit-details-marker{display:none}
+  .faq-item summary:after{content:'+';font-size:22px;color:var(--red);flex:none;transition:transform .2s var(--ease);font-weight:400}
+  .faq-item[open] summary:after{transform:rotate(45deg)}
+  .faq-item .faq-a{padding:0 4px 22px;color:#4a4a4d;font-size:15px;max-width:68ch}
+
+  /* FINAL CTA */
+  .final-cta{background:var(--red);color:var(--white);text-align:left}
+  .final-cta h2{color:var(--white)}
+  .final-cta .lead{color:rgba(255,255,255,0.9)}
+  .final-cta .btn-primary{background:var(--black)}
+  .final-cta .btn-primary:hover{background:#000}
+
+  /* FORM */
+  .form-section{background:var(--gray-light)}
+  .form-wrap{max-width:560px;margin-top:36px}
+  .field{margin-bottom:18px}
+  .field label{display:block;font-size:14px;font-weight:600;margin-bottom:7px}
+  .field input,.field textarea,.field select{
+    width:100%;padding:13px 14px;border:1.5px solid var(--line);border-radius:var(--radius);
+    font-family:'Inter',sans-serif;font-size:15px;background:var(--white);transition:border-color .18s var(--ease)
+  }
+  .field select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='%238a8781'%3E%3Cpath d='M5.5 7.5l4.5 5 4.5-5z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center}
+  .field input:focus,.field textarea:focus,.field select:focus{outline:none;border-color:var(--red)}
+  .field-optional{font-weight:400;color:var(--gray-mid);font-size:12.5px}
+  .consent{display:flex;gap:10px;align-items:flex-start;font-size:13px;color:#4a4a4d;margin-bottom:22px}
+  .consent input{margin-top:3px}
+  .form-success{display:none;background:var(--white);border:1.5px solid var(--red);border-radius:var(--radius);padding:22px;font-weight:600}
+  .form-success.show{display:block}
+  #leadForm.hidden{display:none}
+
+  /* FOOTER */
+  footer{background:var(--black);color:#c7c6c3;padding:56px 0 28px}
+  .footer-grid{display:grid;grid-template-columns:1fr;gap:32px}
+  @media (min-width:760px){.footer-grid{grid-template-columns:1.3fr 1fr 1fr}}
+  footer .brand{color:var(--white)}
+  .footer-col h4{font-size:14px;color:var(--white);margin-bottom:14px;font-weight:600}
+  .footer-col a,.footer-col p{display:block;font-size:14.5px;margin-bottom:10px;color:#c7c6c3}
+  .footer-col a:hover{color:var(--white)}
+  .footer-bottom{margin-top:40px;padding-top:24px;border-top:1px solid var(--line-inv);font-size:13px;color:var(--gray-mid);display:flex;flex-wrap:wrap;gap:12px 24px;justify-content:space-between}
+  .footer-bottom a{color:var(--gray-mid)}
+  .footer-bottom a:hover{color:var(--white)}
+  .footer-legal{margin-top:16px;font-size:12px;color:#6f6d68;max-width:70ch}
+</style>
+</head>
+<body>
+
+<header id="siteHeader">
+  <div class="wrap nav">
+    <a href="#top" class="brand">E&amp;E <span>Fitness</span></a>
+    <nav class="nav-links" aria-label="Основная навигация">
+      <a href="#results">Результаты</a>
+      <a href="#specialists">Специалисты</a>
+      <a href="#services">Программы</a>
+      <a href="#pricing">Цены</a>
+      <a href="#faq">Вопросы</a>
+    </nav>
+    <div class="nav-right">
+      <a href="#form" class="btn btn-primary" style="padding:11px 20px;font-size:14px">Обсудить мою цель</a>
+      <button class="burger" id="burgerBtn" aria-label="Открыть меню" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+  <div class="wrap mobile-menu" id="mobileMenu">
+    <a href="#results">Результаты</a>
+    <a href="#specialists">Специалисты</a>
+    <a href="#services">Программы</a>
+    <a href="#pricing">Цены</a>
+    <a href="#faq">Вопросы</a>
+  </div>
+</header>
+
+<main id="top">
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="wrap hero-grid">
+      <div>
+        <h1>Фитнес, который вписывается в вашу жизнь</h1>
+        <p class="lead">Индивидуальные тренировки и питание, контроль прогресса и регулярные корректировки — для снижения веса, набора мышц и улучшения формы без экстремальных диет и изнурительных тренировок.</p>
+        <div class="hero-tags">
+          <span class="hero-tag">Снижение веса</span>
+          <span class="hero-tag">Набор мышц</span>
+          <span class="hero-tag">Форма</span>
+          <span class="hero-tag">Питание</span>
+          <span class="hero-tag">Тренировки</span>
+        </div>
+        <div class="hero-ctas">
+          <a href="#form" class="btn btn-primary">Начать работу</a>
+          <a href="#results" class="btn btn-ghost-light">Посмотреть результаты</a>
+        </div>
+      </div>
+      <div class="hero-graphic" aria-hidden="true">
+        <svg viewBox="0 0 400 320" width="100%" height="100%">
+          <circle cx="200" cy="160" r="130" fill="none" stroke="rgba(255,255,255,0.14)" stroke-width="1"/>
+          <circle cx="200" cy="160" r="100" fill="none" stroke="rgba(255,255,255,0.14)" stroke-width="1"/>
+          <circle cx="200" cy="160" r="130" fill="none" stroke="#e2352a" stroke-width="3" stroke-dasharray="620" stroke-dashoffset="230" stroke-linecap="round" transform="rotate(-90 200 160)"/>
+          <circle cx="200" cy="160" r="100" fill="none" stroke="#ffffff" stroke-width="3" stroke-dasharray="480" stroke-dashoffset="130" stroke-linecap="round" transform="rotate(-90 200 160)"/>
+          <text x="200" y="152" text-anchor="middle" fill="#ffffff" font-family="Golos Text, sans-serif" font-weight="700" font-size="34">Система</text>
+          <text x="200" y="180" text-anchor="middle" fill="#8a8781" font-family="Inter, sans-serif" font-size="14">вместо хаоса</text>
+        </svg>
+      </div>
+    </div>
+  </section>
+
+  <!-- PROBLEM -->
+  <section class="problem">
+    <div class="wrap">
+      <h2>Знакомо?</h2>
+      <div class="problem-grid">
+        <ul class="problem-list">
+          <li><span class="check"></span> Начинаю худеть с понедельника</li>
+          <li><span class="check"></span> Не понимаю, сколько и что мне есть</li>
+          <li><span class="check"></span> Не знаю, как правильно тренироваться</li>
+          <li><span class="check"></span> Вес уходит, а потом возвращается</li>
+          <li><span class="check"></span> Начал тренироваться, но не понимаю, есть ли прогресс</li>
+          <li><span class="check"></span> Пробовал разные диеты, но надолго меня не хватало</li>
+          <li><span class="check"></span> Слишком много противоречивой информации</li>
+        </ul>
+        <div class="solution-box">
+          <p>E&amp;E Fitness помогает заменить хаос понятной системой, адаптированной под вашу жизнь и цель.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- WHAT IS E&E FITNESS -->
+  <section class="about" id="about">
+    <div class="wrap">
+      <h2 class="eyebrow-free">Не просто программа. Система работы над результатом.</h2>
+      <p class="lead">E&amp;E Fitness объединяет тренировочный план, питание, контроль динамики и регулярные корректировки. Клиент не получает план и не остаётся с ним один на один — мы сопровождаем процесс на всех этапах.</p>
+      <p class="key-message">Цель — не просто получить результат, а создать подход, который можно поддерживать в долгосрочной перспективе.</p>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section id="how">
+    <div class="wrap">
+      <h2>Как это работает</h2>
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">01</div>
+          <div class="step-body"><h3>Анализ</h3><p>Определяем цель, исходные данные, уровень подготовки, образ жизни и ограничения.</p></div>
+        </div>
+        <div class="step">
+          <div class="step-num">02</div>
+          <div class="step-body"><h3>Индивидуальный план</h3><p>Формируем стратегию питания и тренировок под конкретного человека и его цель.</p></div>
+        </div>
+        <div class="step">
+          <div class="step-num">03</div>
+          <div class="step-body"><h3>Работа</h3><p>Клиент выполняет план, получает поддержку и обратную связь.</p></div>
+        </div>
+        <div class="step">
+          <div class="step-num">04</div>
+          <div class="step-body"><h3>Контроль</h3><p>Отслеживаем вес, замеры, питание, тренировки и другие показатели.</p></div>
+        </div>
+        <div class="step">
+          <div class="step-num">05</div>
+          <div class="step-body"><h3>Корректировки</h3><p>Адаптируем питание и нагрузку при изменении обстоятельств или динамики.</p></div>
+        </div>
+        <div class="step">
+          <div class="step-num">06</div>
+          <div class="step-body"><h3>Результат</h3><p>Стремимся не только получить результат, но и сделать его устойчивым.</p></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- REAL RESULTS -->
+  <section id="results" style="background:var(--gray-light)">
+    <div class="wrap">
+      <h2>Результаты клиентов</h2>
+      <p class="lead" style="margin-top:10px">Реальные изменения — без постановочных обещаний и универсальных цифр. Каждый результат зависит от исходных данных, цели и соблюдения плана.</p>
+      <div class="case-grid">
+
+        <div class="case-card">
+          <img class="case-photo" src="images/case-1.jpg" alt="Результат клиента E&amp;E Fitness: снижение веса со 139 до 102 кг">
+          <div class="case-body">
+            <span class="case-tag">Снижение веса</span>
+            <div class="case-stats">
+              <span class="case-delta">-37 кг</span>
+              <span class="case-range">139 кг → 102 кг</span>
+            </div>
+            <div class="case-duration">03.01.2023 → 03.05.2023 · 4 месяца</div>
+            <p class="case-desc">Один из реальных результатов E&amp;E Fitness. За четыре месяца вес клиента снизился со 139 до 102 кг.</p>
+          </div>
+        </div>
+
+        <div class="case-card">
+          <img class="case-photo" src="images/case-2.jpg" alt="Результат клиента E&amp;E Fitness: снижение веса и набор мышечной массы">
+          <div class="case-body">
+            <span class="case-tag">Изменение состава тела</span>
+            <div class="case-stats">
+              <span class="case-delta">-47 кг</span>
+              <span class="case-range">138 кг → 91 кг</span>
+            </div>
+            <div class="case-duration">02.2025 → 08.2026 · мышечная масса +9 кг</div>
+            <p class="case-desc">Снижение веса совмещалось с набором мышечной массы — вес ушёл, а мышечная масса, напротив, выросла на 9 кг.</p>
+          </div>
+        </div>
+
+        <div class="case-card">
+          <img class="case-photo" src="images/case-3.jpg" alt="Результат клиентки E&amp;E Fitness — до и после">
+          <div class="case-body">
+            <span class="case-tag">Изменение формы</span>
+            <div class="case-stats">
+              <span class="case-range">Данные уточняются</span>
+            </div>
+            <p class="case-desc">Реальная история клиентки E&amp;E Fitness. Точные цифры и сроки добавим по вашему подтверждению.</p>
+          </div>
+        </div>
+
+        <div class="case-card">
+          <img class="case-photo" src="images/case-4.jpg" alt="Результат клиентки E&amp;E Fitness — до и после">
+          <div class="case-body">
+            <span class="case-tag">Изменение формы</span>
+            <div class="case-stats">
+              <span class="case-range">Данные уточняются</span>
+            </div>
+            <p class="case-desc">Реальная история клиентки E&amp;E Fitness. Точные цифры и сроки добавим по вашему подтверждению.</p>
+          </div>
+        </div>
+
+      </div>
+      <p class="case-disclaimer">Результаты индивидуальны и зависят от исходных данных, соблюдения рекомендаций и других факторов. Результат конкретного клиента не является гарантией аналогичного результата.</p>
+    </div>
+  </section>
+
+  <!-- SPECIALISTS -->
+  <section class="specialists" id="specialists">
+    <div class="wrap">
+      <h2>Специалисты E&amp;E Fitness</h2>
+      <p class="lead" style="margin-top:10px;color:#c7c6c3">Мы объединяем компетенции специалистов в области тренировок, питания и здоровья.</p>
+      <div class="spec-grid">
+        <div class="spec-card">
+          <img class="spec-photo" src="images/trainer-anton.png" alt="Антон — тренер E&amp;E Fitness">
+          <div class="spec-body">
+            <div class="spec-name">Антон</div>
+            <div class="spec-role">Фитнес-тренер / специалист по тренировкам</div>
+            <p class="spec-bio">Составляет и ведёт программу тренировок, корректирует технику выполнения и подбирает нагрузку под цель и уровень подготовки клиента.</p>
+            <div class="spec-badges">
+              <span class="spec-badge">Персональные тренировки</span>
+              <span class="spec-badge">Коррекция техники</span>
+            </div>
+          </div>
+        </div>
+        <div class="spec-card">
+          <img class="spec-photo" src="images/nutritionist-elena.png" alt="Елена — врач-нутрициолог E&amp;E Fitness">
+          <div class="spec-body">
+            <div class="spec-name">Елена</div>
+            <div class="spec-role">Нутрициолог-врач</div>
+            <p class="spec-bio">Специалист по питанию и вопросам здоровья. При оценке ситуации учитываются не только питание и вес, но и индивидуальные особенности человека и имеющиеся медицинские данные.</p>
+            <div class="spec-badges">
+              <span class="spec-badge">Врач</span>
+              <span class="spec-badge">Нутрициолог</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- COMPREHENSIVE APPROACH -->
+  <section id="approach">
+    <div class="wrap">
+      <h2>Комплексный подход</h2>
+      <div class="approach-grid">
+        <div class="approach-card">
+          <h3>Тренировки</h3>
+          <p>Индивидуальная программа и контроль прогрессии.</p>
+        </div>
+        <div class="approach-card">
+          <h3>Питание</h3>
+          <p>Настройка рациона под цель и образ жизни.</p>
+        </div>
+        <div class="approach-card">
+          <h3>Здоровье</h3>
+          <p>Учёт медицинских данных в рамках компетенции специалиста.</p>
+        </div>
+        <div class="approach-card">
+          <h3>Дополнительные специалисты</h3>
+          <p>При необходимости — консультации эндокринолога, диетолога, реабилитолога и других профильных специалистов.</p>
+        </div>
+      </div>
+      <p class="medical-note">Информация на сайте не заменяет медицинскую консультацию, диагностику или лечение.</p>
+    </div>
+  </section>
+
+  <!-- WHY US -->
+  <section id="why" style="background:var(--gray-light)">
+    <div class="wrap">
+      <h2>Почему E&amp;E Fitness</h2>
+      <div class="why-grid">
+        <div class="why-item"><span class="why-dot"></span><div><h3>Индивидуальный подход</h3><p>План строится под конкретного человека, а не под усреднённого клиента.</p></div></div>
+        <div class="why-item"><span class="why-dot"></span><div><h3>Питание без крайностей</h3><p>Без необходимости строить рацион вокруг краткосрочных жёстких ограничений.</p></div></div>
+        <div class="why-item"><span class="why-dot"></span><div><h3>Контроль динамики</h3><p>Оцениваем не только вес, но и замеры, тренировки и другие показатели.</p></div></div>
+        <div class="why-item"><span class="why-dot"></span><div><h3>Корректировки</h3><p>План адаптируется вместе с изменением ситуации и результата.</p></div></div>
+        <div class="why-item"><span class="why-dot"></span><div><h3>Команда специалистов</h3><p>Тренировки, питание и вопросы здоровья рассматриваются комплексно.</p></div></div>
+        <div class="why-item"><span class="why-dot"></span><div><h3>Результат на перспективу</h3><p>Задача — не только получить результат, но и помочь его удерживать.</p></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SERVICES -->
+  <section id="services">
+    <div class="wrap">
+      <h2>Программы</h2>
+      <p class="lead" style="margin-top:10px">Форматы идут по нарастающей — каждый следующий включает всё из предыдущего.</p>
+      <div class="cards3">
+        <div class="service-card">
+          <h3>Консультация</h3>
+          <p style="font-size:14.5px;color:#4a4a4d">Разовая встреча, чтобы разобраться и наметить путь.</p>
+          <ul>
+            <li>Биоимпедансная диагностика с расшифровкой</li>
+            <li>Разбор питания</li>
+            <li>Разбор тренировок</li>
+            <li>Стратегия снижения веса</li>
+            <li>Следующие шаги</li>
+          </ul>
+          <p class="for-whom">Если нужно разобраться в ситуации и получить направление действий.</p>
+        </div>
+        <div class="service-card">
+          <h3>Готовая программа</h3>
+          <p style="font-size:14.5px;color:#4a4a4d">Структурированный план без постоянного сопровождения.</p>
+          <ul>
+            <li>Биоимпедансная диагностика с расшифровкой</li>
+            <li>Программа тренировок</li>
+            <li>Рекомендации по питанию</li>
+            <li>Пошаговые инструкции</li>
+            <li>Рекомендации по прогрессу</li>
+          </ul>
+          <p class="for-whom">Если вы готовы самостоятельно выполнять план, но хотите получить профессионально составленную основу.</p>
+        </div>
+        <div class="service-card">
+          <h3>Частичное сопровождение</h3>
+          <p style="font-size:14.5px;color:#4a4a4d">Периодический контроль и корректировки — без ежедневного ведения.</p>
+          <ul>
+            <li>Всё из тарифа «Готовая программа»</li>
+            <li>Еженедельный созвон / проверка</li>
+            <li>Еженедельные корректировки плана</li>
+            <li>Поддержка в Telegram</li>
+          </ul>
+          <p class="for-whom">Если нужна периодическая обратная связь и корректировки, но не постоянное сопровождение каждый день.</p>
+        </div>
+        <div class="service-card">
+          <h3>Персональное сопровождение</h3>
+          <p style="font-size:14.5px;color:#4a4a4d">Полное ведение с постоянной поддержкой тренера.</p>
+          <ul>
+            <li>Всё из тарифа «Частичное сопровождение»</li>
+            <li>Постоянный контроль прогресса</li>
+            <li>Регулярные корректировки по ходу работы</li>
+            <li>Постоянная поддержка на связи</li>
+          </ul>
+          <p class="for-whom">Если нужен постоянный контроль, обратная связь и корректировка стратегии по мере прогресса.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PRICING -->
+  <section class="pricing" id="pricing">
+    <div class="wrap">
+      <h2>Стоимость</h2>
+      <p class="lead" style="margin-top:10px">Прозрачные тарифы без скрытых условий.</p>
+      <div class="price-grid">
+        <div class="price-card">
+          <div class="price-name">Консультация</div>
+          <div class="price-amount">1 990 ₽</div>
+          <div class="price-duration">разовая встреча, 60 минут</div>
+          <ul class="price-features">
+            <li>Биоимпедансная диагностика с расшифровкой</li>
+            <li>Разбор текущей ситуации</li>
+            <li>Рекомендации по питанию</li>
+            <li>Рекомендации по тренировкам</li>
+            <li>План следующих шагов</li>
+          </ul>
+          <a href="#form" class="btn btn-ghost-dark">Оставить заявку</a>
+        </div>
+        <div class="price-card">
+          <div class="price-name">Готовая программа</div>
+          <div class="price-amount">3 900 ₽</div>
+          <div class="price-duration">разово</div>
+          <ul class="price-features">
+            <li>Биоимпедансная диагностика с расшифровкой</li>
+            <li>Программа тренировок</li>
+            <li>Рекомендации по питанию</li>
+            <li>Инструкции по выполнению</li>
+            <li>Без постоянного сопровождения</li>
+          </ul>
+          <a href="#form" class="btn btn-ghost-dark">Оставить заявку</a>
+        </div>
+        <div class="price-card">
+          <div class="price-name">Частичное сопровождение</div>
+          <div class="price-amount">5 900 ₽</div>
+          <div class="price-duration">в месяц</div>
+          <div class="price-includes">Включает тариф «Готовая программа»</div>
+          <ul class="price-features">
+            <li>Еженедельный созвон / проверка</li>
+            <li>Еженедельные корректировки плана</li>
+            <li>Поддержка в Telegram</li>
+          </ul>
+          <a href="#form" class="btn btn-ghost-dark">Оставить заявку</a>
+        </div>
+        <div class="price-card featured">
+          <div class="price-tag">Оптимальный выбор</div>
+          <div class="price-name">Персональное сопровождение</div>
+          <div class="price-amount">12 900 ₽</div>
+          <div class="price-duration">в месяц</div>
+          <div class="price-includes">Включает тариф «Частичное сопровождение»</div>
+          <ul class="price-features">
+            <li>Постоянный контроль прогресса</li>
+            <li>Регулярные корректировки по ходу работы</li>
+            <li>Постоянная поддержка на связи</li>
+          </ul>
+          <a href="#form" class="btn btn-primary">Начать</a>
+        </div>
+      </div>
+      <p style="font-size:13px;color:var(--gray-mid);margin-top:20px">Стоимость актуальна на момент публикации.</p>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section id="faq">
+    <div class="wrap">
+      <h2>Частые вопросы</h2>
+      <div class="faq-list">
+        <details class="faq-item">
+          <summary>Можно ли заниматься дома?</summary>
+          <div class="faq-a">Да, программу можно адаптировать под тренировки дома, в зале или в смешанном формате — в зависимости от того, что вам удобнее.</div>
+        </details>
+        <details class="faq-item">
+          <summary>Подойдёт ли программа новичку?</summary>
+          <div class="faq-a">Да. План всегда строится от вашего текущего уровня, поэтому подходит и тем, кто никогда не тренировался.</div>
+        </details>
+        <details class="faq-item">
+          <summary>Нужно ли считать калории?</summary>
+          <div class="faq-a">Не обязательно. Мы подбираем формат учёта питания, который вам комфортно соблюдать долго, а не только первую неделю.</div>
+        </details>
+        <details class="faq-item">
+          <summary>Можно ли есть обычную еду?</summary>
+          <div class="faq-a">Да. Мы строим план на основе привычных продуктов, а не строгих списков «можно/нельзя».</div>
+        </details>
+        <details class="faq-item">
+          <summary>Что делать, если я пропустил тренировку?</summary>
+          <div class="faq-a">Ничего страшного — план гибкий, и мы просто скорректируем расписание без чувства вины и «срывов».</div>
+        </details>
+        <details class="faq-item">
+          <summary>Как часто корректируется программа?</summary>
+          <div class="faq-a">Регулярно, по мере отслеживания динамики — питание и нагрузка меняются вместе с вашим прогрессом.</div>
+        </details>
+        <details class="faq-item">
+          <summary>Можно ли начать при большом лишнем весе?</summary>
+          <div class="faq-a">Да, план всегда адаптируется под текущее состояние и возможности, темп подбирается индивидуально.</div>
+        </details>
+        <details class="faq-item">
+          <summary>Как проходит онлайн-сопровождение?</summary>
+          <div class="faq-a">Основное общение — в Telegram: там вы получаете план, отчитываетесь о прогрессе и задаёте вопросы.</div>
+        </details>
+        <details class="faq-item">
+          <summary>Можно ли купить только программу без сопровождения?</summary>
+          <div class="faq-a">Да, для этого есть отдельный формат «Готовая программа» без постоянного сопровождения тренера.</div>
+        </details>
+        <details class="faq-item">
+          <summary>Есть ли медицинское сопровождение?</summary>
+          <div class="faq-a">В команде E&amp;E Fitness есть врач-нутрициолог, и при необходимости учитываются имеющиеся медицинские данные в рамках профессиональной компетенции специалиста. При этом сервис не заменяет медицинскую диагностику или лечение — за этим стоит обращаться напрямую к профильному врачу.</div>
+        </details>
+        <details class="faq-item">
+          <summary>Нужно ли спортивное питание?</summary>
+          <div class="faq-a">Нет, спортивное питание не обязательно. Вопрос добавок рассматривается индивидуально, только если это действительно нужно под вашу ситуацию и цель.</div>
+        </details>
+        <details class="faq-item">
+          <summary>Вы работаете только на снижение веса?</summary>
+          <div class="faq-a">Нет. Мы работаем с разными целями: снижение веса, набор мышечной массы, изменение состава тела и общее улучшение физической формы.</div>
+        </details>
+        <details class="faq-item">
+          <summary>Можно ли начать после долгого перерыва?</summary>
+          <div class="faq-a">Да. Тренировки начинаются от вашего текущего уровня и наращиваются постепенно, с учётом перерыва в занятиях.</div>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <!-- FINAL CTA -->
+  <section class="final-cta">
+    <div class="wrap">
+      <h2>Не знаете, с чего начать? Начните с разговора.</h2>
+      <p class="lead" style="margin:14px 0 28px">Расскажите о своей цели и текущей ситуации. Мы поможем определить подходящий формат работы.</p>
+      <a href="#form" class="btn btn-primary">Обсудить мою цель</a>
+    </div>
+  </section>
+
+  <!-- FORM -->
+  <section class="form-section" id="form">
+    <div class="wrap">
+      <h2>Оставить заявку</h2>
+      <p class="lead" style="margin-top:10px">Заполните форму — мы свяжемся с вами и поможем определиться с форматом.</p>
+      <div class="form-wrap">
+        <form id="leadForm" novalidate>
+          <div class="field">
+            <label for="name">Имя</label>
+            <input type="text" id="name" name="name" required
+              pattern="[A-Za-zА-Яа-яЁё\-\s]{2,60}"
+              title="Введите имя буквами, минимум 2 символа">
+          </div>
+          <div class="field">
+            <label for="contact">Способ связи</label>
+            <input type="text" id="contact" name="contact" required
+              placeholder="Телефон, Telegram (@username) или email"
+              pattern="^(\+?\d[\d\s\-\(\)]{6,14}\d|[A-Za-z0-9._%+\-]+@[A-Za-z0-9.\-]+\.[A-Za-z]{2,}|@?[A-Za-zА-Яа-я][A-Za-z0-9_]{4,31})$"
+              title="Укажите телефон, Telegram (например, @username) или email">
+          </div>
+          <div class="field">
+            <label for="goal">Цель</label>
+            <select id="goal" name="goal" required>
+              <option value="" disabled selected>Выберите цель</option>
+              <option value="Снижение веса">Снижение веса</option>
+              <option value="Набор мышечной массы">Набор мышечной массы</option>
+              <option value="Изменение состава тела">Изменение состава тела</option>
+              <option value="Улучшение физической формы">Улучшение физической формы</option>
+              <option value="Питание">Питание</option>
+              <option value="Тренировки">Тренировки</option>
+              <option value="Не знаю, нужна консультация">Не знаю, нужна консультация</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="comment">Комментарий <span class="field-optional">(необязательно)</span></label>
+            <textarea id="comment" name="comment" rows="3" placeholder="Дополнительно о своей ситуации"></textarea>
+          </div>
+          <div class="field">
+            <label for="promo">Промокод <span class="field-optional">(если есть)</span></label>
+            <input type="text" id="promo" name="promo" placeholder="Например: START10">
+          </div>
+          <label class="consent">
+            <input type="checkbox" required>
+            <span>Я согласен(на) с <a href="privacy.html" target="_blank" style="text-decoration:underline">политикой конфиденциальности</a> и даю согласие на обработку персональных данных.</span>
+          </label>
+          <button type="submit" class="btn btn-primary" style="width:100%">Обсудить мою цель</button>
+        </form>
+        <div class="form-success" id="formSuccess">Спасибо! Заявка отправлена. Мы свяжемся с вами в ближайшее время.</div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer id="contacts">
+  <div class="wrap">
+    <div class="footer-grid">
+      <div class="footer-col">
+        <a href="#top" class="brand">E&amp;E Fitness</a>
+        <p style="margin-top:14px;max-width:34ch">Energy &amp; Evolution Fitness — индивидуальные программы питания и тренировок для реалистичного и устойчивого результата.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Навигация</h4>
+        <a href="#results">Результаты</a>
+        <a href="#specialists">Специалисты</a>
+        <a href="#services">Программы</a>
+        <a href="#pricing">Цены</a>
+        <a href="#faq">Вопросы</a>
+      </div>
+      <div class="footer-col">
+        <h4>Контакты</h4>
+        <a href="https://t.me/EEFitness1_bot" target="_blank" rel="noopener">Telegram: @EEFitness1_bot</a>
+        <a href="tel:+79057777370">+7 905 777-73-70</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 E&amp;E Fitness. Все права защищены.</span>
+      <a href="privacy.html">Политика конфиденциальности</a>
+    </div>
+    <p class="footer-legal">Информация на сайте носит справочный характер и не является публичной офертой. Сведения о состоянии здоровья, приведённые на сайте, не заменяют консультацию врача.</p>
+  </div>
+</footer>
+
+<script>
+  // header shadow on scroll
+  const header = document.getElementById('siteHeader');
+  window.addEventListener('scroll', () => {
+    header.classList.toggle('scrolled', window.scrollY > 8);
+  });
+
+  // mobile menu
+  const burger = document.getElementById('burgerBtn');
+  const mobileMenu = document.getElementById('mobileMenu');
+  burger.addEventListener('click', () => {
+    const open = mobileMenu.classList.toggle('open');
+    burger.setAttribute('aria-expanded', open);
+  });
+  mobileMenu.querySelectorAll('a').forEach(a => a.addEventListener('click', () => {
+    mobileMenu.classList.remove('open');
+    burger.setAttribute('aria-expanded', 'false');
+  }));
+
+  // form submit — отправляет заявку на серверный эндпоинт /api/lead (Vercel),
+  // который безопасно пересылает её в Telegram (токен хранится на сервере)
+  const leadForm = document.getElementById('leadForm');
+  const formSuccess = document.getElementById('formSuccess');
+  const LEAD_ENDPOINT = '/api/lead';
+
+  leadForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (!leadForm.checkValidity()) { leadForm.reportValidity(); return; }
+
+    const name    = document.getElementById('name').value.trim();
+    const contact = document.getElementById('contact').value.trim();
+    const goal    = document.getElementById('goal').value.trim();
+    const comment = document.getElementById('comment').value.trim();
+    const promo   = document.getElementById('promo').value.trim();
+
+    const goalText = goal + (comment ? ' — ' + comment : '') + (promo ? ' [промокод: ' + promo + ']' : '');
+
+    const submitBtn = leadForm.querySelector('button[type="submit"]');
+    submitBtn.disabled = true;
+
+    try {
+      const response = await fetch(LEAD_ENDPOINT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, contact, goal: goalText }),
+      });
+      const data = await response.json();
+      if (!data.ok) throw new Error(data.error || 'Unknown error');
+
+      leadForm.classList.add('hidden');
+      formSuccess.classList.add('show');
+    } catch (err) {
+      submitBtn.disabled = false;
+      alert('Не удалось отправить заявку. Попробуйте ещё раз или напишите нам в Telegram напрямую.');
+    }
+  });
+</script>
+
+</body>
+</html>
