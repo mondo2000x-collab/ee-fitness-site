@@ -77,7 +77,7 @@
     transition:border-color .2s var(--ease);
   }
   header.scrolled{border-color:var(--line)}
-  .nav{display:flex;align-items:center;justify-content:space-between;padding:18px 0}
+  .nav{display:flex;align-items:center;justify-content:space-between;padding-top:18px;padding-bottom:18px}
   .brand{font-size:19px;font-weight:700;color:var(--black)}
   .brand span{color:var(--red)}
   .nav-links{display:none;gap:28px;font-size:14.5px;font-weight:500;color:var(--text)}
@@ -100,7 +100,8 @@
   .hero h1{font-size:clamp(34px,6vw,58px);font-weight:900;line-height:1.06;letter-spacing:-0.02em;margin-bottom:22px;opacity:0;transform:translateY(16px);animation:rise .7s var(--ease) forwards .1s}
   .hero .lead{color:#c7c6c3;font-size:18px;margin-bottom:18px;opacity:0;transform:translateY(16px);animation:rise .7s var(--ease) forwards .25s}
   .hero-tags{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:32px;opacity:0;transform:translateY(16px);animation:rise .7s var(--ease) forwards .32s}
-  .hero-tag{font-size:12.5px;font-weight:600;color:#dedcd8;border:1px solid var(--line-inv);padding:6px 12px;border-radius:20px}
+  .hero-tag{font-size:12.5px;font-weight:600;color:#dedcd8;padding:4px 0}
+  .hero-tag:not(:last-child)::after{content:'·';margin-left:12px;color:var(--gray-mid)}
   .hero-ctas{display:flex;flex-wrap:wrap;gap:14px;opacity:0;transform:translateY(16px);animation:rise .7s var(--ease) forwards .4s}
   @keyframes rise{to{opacity:1;transform:translateY(0)}}
   .hero-graphic{position:relative;height:320px;opacity:0;animation:fadeIn 1s var(--ease) forwards .5s}
@@ -352,8 +353,8 @@
   <section class="about" id="about">
     <div class="wrap">
       <h2 class="eyebrow-free">Не просто программа. Система работы над результатом.</h2>
-      <p class="lead">E&amp;E Fitness объединяет тренировочный план, питание, контроль динамики и регулярные корректировки. Клиент не получает план и не остаётся с ним один на один — мы сопровождаем процесс на всех этапах.</p>
-      <p class="key-message">Цель — не просто получить результат, а создать подход, который можно поддерживать в долгосрочной перспективе.</p>
+      <p class="lead">E&amp;E Fitness объединяет тренировочный план, питание, контроль динамики и регулярные корректировки. Вы получаете не просто план, а постоянное сопровождение на каждом этапе.</p>
+      <p class="key-message">Цель — создать не разовый результат, а подход, который можно поддерживать в долгосрочной перспективе.</p>
     </div>
   </section>
 
@@ -364,27 +365,27 @@
       <div class="steps">
         <div class="step">
           <div class="step-num">01</div>
-          <div class="step-body"><h3>Анализ</h3><p>Определяем цель, исходные данные, уровень подготовки, образ жизни и ограничения.</p></div>
+          <div class="step-body"><h3>АНАЛИЗИРУЕМ</h3><p>Изучаем ваши цели, образ жизни, привычки и исходные показатели.</p></div>
         </div>
         <div class="step">
           <div class="step-num">02</div>
-          <div class="step-body"><h3>Индивидуальный план</h3><p>Формируем стратегию питания и тренировок под конкретного человека и его цель.</p></div>
+          <div class="step-body"><h3>ФОРМИРУЕМ ПЛАН</h3><p>Формируем стратегию питания и тренировок под ваши цели и особенности.</p></div>
         </div>
         <div class="step">
           <div class="step-num">03</div>
-          <div class="step-body"><h3>Работа</h3><p>Клиент выполняет план, получает поддержку и обратную связь.</p></div>
+          <div class="step-body"><h3>РАБОТАЕМ ВМЕСТЕ</h3><p>Следуем плану, получаем обратную связь и поддерживаем вас на каждом этапе.</p></div>
         </div>
         <div class="step">
           <div class="step-num">04</div>
-          <div class="step-body"><h3>Контроль</h3><p>Отслеживаем вес, замеры, питание, тренировки и другие показатели.</p></div>
+          <div class="step-body"><h3>ОТСЛЕЖИВАЕМ</h3><p>Отслеживаем вес, замеры, питание, тренировки и динамику.</p></div>
         </div>
         <div class="step">
           <div class="step-num">05</div>
-          <div class="step-body"><h3>Корректировки</h3><p>Адаптируем питание и нагрузку при изменении обстоятельств или динамики.</p></div>
+          <div class="step-body"><h3>КОРРЕКТИРУЕМ</h3><p>Адаптируем питание и нагрузку с учётом ваших результатов и изменений.</p></div>
         </div>
         <div class="step">
           <div class="step-num">06</div>
-          <div class="step-body"><h3>Результат</h3><p>Стремимся не только получить результат, но и сделать его устойчивым.</p></div>
+          <div class="step-body"><h3>ДОСТИГАЕМ ЦЕЛИ</h3><p>Оцениваем динамику и двигаемся к желаемому результату.</p></div>
         </div>
       </div>
     </div>
@@ -406,7 +407,7 @@
               <span class="case-range">139 кг → 102 кг</span>
             </div>
             <div class="case-duration">03.01.2023 → 03.05.2023 · 4 месяца</div>
-            <p class="case-desc">Один из реальных результатов E&amp;E Fitness. За четыре месяца вес клиента снизился со 139 до 102 кг.</p>
+            <p class="case-desc">Снижение веса со 139 до 102 кг за четыре месяца — с помощью индивидуального плана питания и тренировок.</p>
           </div>
         </div>
 
@@ -529,7 +530,6 @@
   <section id="services">
     <div class="wrap">
       <h2>Программы</h2>
-      <p class="lead" style="margin-top:10px">Форматы идут по нарастающей — каждый следующий включает всё из предыдущего.</p>
       <div class="cards3">
         <div class="service-card">
           <h3>Консультация</h3>
@@ -639,7 +639,6 @@
           <a href="#form" class="btn btn-primary">Начать</a>
         </div>
       </div>
-      <p style="font-size:13px;color:var(--gray-mid);margin-top:20px">Стоимость актуальна на момент публикации.</p>
     </div>
   </section>
 
